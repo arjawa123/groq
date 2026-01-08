@@ -16,43 +16,46 @@ app.post('/api/validate', async (req, res) => {
 
     try {
         const chatCompletion = await groq.chat.completions.create({
-            // Model llama-3.1-8b-instant sangat cepat untuk validasi teks pendek
             "model": "llama-3.1-8b-instant",
             "messages": [
                 {
                     "role": "system",
-                    "content": `Anda adalah sistem validasi bahasa Jepang yang ketat. 
-                    Anda WAJIB mengisi semua field dalam JSON. 
-                    Jika kalimat benar, 'correction' tetap diisi dengan kalimat asli dan 'explanation' berisi pujian atau penjelasan tata bahasa yang digunakan.`
+                    "content": `Anda adalah Sensei (Guru) Bahasa Jepang ahli yang khusus membantu siswa tingkat dasar (A2/N5). 
+                    Tugas Anda: Memvalidasi kalimat yang dibuat siswa berdasarkan kata kunci tertentu.
+                    
+                    Pedoman Validasi:
+                    1. Periksa apakah semua "Kata Wajib" ada dalam kalimat.
+                    2. Periksa akurasi partikel (wa, ga, o, ni, de, dll).
+                    3. Periksa konjugasi kata kerja (bentuk ~masu, ~te, dll).
+                    4. Jika kalimat benar, jelaskan MENGAPA itu benar secara tata bahasa.
+                    5. Jika kalimat salah, berikan koreksi yang paling alami bagi penutur asli Jepang.
+                    
+                    Output WAJIB berupa JSON dengan field:
+                    - is_correct: boolean
+                    - correction: string (kalimat yang sudah diperbaiki/asli jika sudah benar)
+                    - explanation: string (penjelasan mendalam dalam Bahasa Indonesia tentang pola kalimat/partikel)
+                    - score: integer (0-100)`
                 },
                 {
                     "role": "user",
                     "content": `
-                    Kata wajib: ${words.join(", ")}
-                    Kalimat: "${userSentence}"
+                    INPUT DATA:
+                    - Kata Wajib: [${words.join(", ")}]
+                    - Kalimat Siswa: "${userSentence}"
                     
-                    Format JSON harus tepat:
-                    {
-                      "is_correct": boolean,
-                      "correction": "tulis kembali kalimat atau perbaiki jika salah",
-                      "explanation": "jelaskan alasan koreksi atau jelaskan pola tata bahasa yang digunakan dalam Bahasa Indonesia",
-                      "score": "angka 0-100"
-                    }`
+                    Tolong validasi dengan detail seperti guru bahasa.`
                 }
             ],
             "response_format": { "type": "json_object" },
-            "temperature": 0.1, // Suhu rendah agar AI lebih konsisten dan tidak berhalusinasi
+            "temperature": 0.3, // Sedikit dinaikkan dari 0.1 agar penjelasan lebih mengalir (tidak kaku)
         });
 
         const content = chatCompletion.choices[0].message.content;
         res.json(JSON.parse(content));
         
     } catch (error) {
-        console.error("Groq Error Detail:", error);
-        res.status(500).json({ 
-            error: "Gagal memproses validasi via Groq", 
-            detail: error.message 
-        });
+        console.error("Error:", error);
+        res.status(500).json({ error: "Gagal memproses validasi" });
     }
 });
 
