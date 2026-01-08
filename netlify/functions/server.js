@@ -21,15 +21,25 @@ app.post('/api/validate', async (req, res) => {
             "messages": [
                 {
                     "role": "system",
-                    "content": "Tugas: Validasi kalimat Bahasa Jepang. Berikan respon HANYA dalam format JSON mentah."
+                    "content": `Anda adalah sistem validasi bahasa Jepang yang ketat. 
+                    Anda WAJIB mengisi semua field dalam JSON. 
+                    Jika kalimat benar, 'correction' tetap diisi dengan kalimat asli dan 'explanation' berisi pujian atau penjelasan tata bahasa yang digunakan.`
                 },
                 {
                     "role": "user",
-                    "content": `Kata wajib digunakan: ${words.join(", ")}. Kalimat User: "${userSentence}". 
-                    Struktur JSON: { "is_correct": boolean, "correction": "string", "explanation": "string", "score": "string" }`
+                    "content": `
+                    Kata wajib: ${words.join(", ")}
+                    Kalimat: "${userSentence}"
+                    
+                    Format JSON harus tepat:
+                    {
+                      "is_correct": boolean,
+                      "correction": "tulis kembali kalimat atau perbaiki jika salah",
+                      "explanation": "jelaskan alasan koreksi atau jelaskan pola tata bahasa yang digunakan dalam Bahasa Indonesia",
+                      "score": "angka 0-100"
+                    }`
                 }
             ],
-            // Mengaktifkan mode JSON agar output selalu valid secara format
             "response_format": { "type": "json_object" },
             "temperature": 0.1, // Suhu rendah agar AI lebih konsisten dan tidak berhalusinasi
         });
