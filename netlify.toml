@@ -1,0 +1,15 @@
+[build]
+  # Folder tempat file server.js berada (sesuai poin 1)
+  functions = "netlify/functions"
+
+[[redirects]]
+  # Mengarahkan semua trafik yang dimulai dengan /api/ ke fungsi serverless kita
+  from = "/api/*"
+  to = "/.netlify/functions/server/api/:splat"
+  status = 200
+
+[[redirects]]
+  # Mengarahkan trafik lainnya (opsional)
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
